@@ -11,9 +11,9 @@ contract MyToken is ERC20, AccessControl, Pausable {
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     constructor() ERC20("MyToken", "MTK") {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(MINTER_ROLE, msg.sender);
-        _setupRole(BURNER_ROLE, msg.sender);
+        grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        grantRole(MINTER_ROLE, msg.sender);
+        grantRole(BURNER_ROLE, msg.sender);
         _mint(msg.sender, 100000 * 10 ** decimals());
     }
 
@@ -31,9 +31,5 @@ contract MyToken is ERC20, AccessControl, Pausable {
 
     function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
-    }
-
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override whenNotPaused {
-        super._beforeTokenTransfer(from, to, amount);
     }
 }
