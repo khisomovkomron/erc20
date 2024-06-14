@@ -12,10 +12,10 @@ contract MyToken is ERC20, AccessControl, Pausable {
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     constructor() ERC20("MyToken", "MTK") {
-        grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        grantRole(MINTER_ROLE, msg.sender);
-        grantRole(BURNER_ROLE, msg.sender);
-        _mint(msg.sender, 100000 * 10 ** decimals());
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(BURNER_ROLE, msg.sender);
+        _mint(msg.sender, 100000 * 10 ** 18);
         console.log("Contract started");
     }
 

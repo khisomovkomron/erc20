@@ -9,8 +9,11 @@ contract DeployMyToken is Script {
         vm.startBroadcast();
 
         MyToken mytoken = new MyToken();
+        mytoken.grantRole(mytoken.MINTER_ROLE(), msg.sender);
+        mytoken.grantRole(mytoken.BURNER_ROLE(), msg.sender);
 
         vm.stopBroadcast();
+
         return mytoken;
     }
 }
