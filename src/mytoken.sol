@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import {Pausable} from "lib/openzeppelin-contracts/contracts/utils/Pausable.sol";
+import {console} from "lib/forge-std/src/console.sol";
 
 contract MyToken is ERC20, AccessControl, Pausable {
     address public owner = msg.sender;
@@ -15,6 +16,7 @@ contract MyToken is ERC20, AccessControl, Pausable {
         grantRole(MINTER_ROLE, msg.sender);
         grantRole(BURNER_ROLE, msg.sender);
         _mint(msg.sender, 100000 * 10 ** decimals());
+        console.log("Contract started");
     }
 
     function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
