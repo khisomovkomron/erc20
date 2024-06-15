@@ -25,4 +25,9 @@ contract TestMyToken is Test, Script {
         assertEq(token.totalSupply(), mintingValue * 2);
     }
 
+    function testBurning() public {
+        token.burn(msg.sender, (100000 * 10 ** 18) / 2);
+        assertEq(token.totalSupply(), 50000 * 10 ** 18);
+    }
+
 }
