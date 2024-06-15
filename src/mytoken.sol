@@ -7,7 +7,6 @@ import {Pausable} from "lib/openzeppelin-contracts/contracts/utils/Pausable.sol"
 import {console} from "lib/forge-std/src/console.sol";
 
 contract MyToken is ERC20, AccessControl, Pausable {
-    address public owner = msg.sender;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
@@ -34,4 +33,5 @@ contract MyToken is ERC20, AccessControl, Pausable {
     function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
+
 }
