@@ -26,11 +26,11 @@ contract MyToken is ERC20, AccessControl, Pausable {
         _burn(from, value);
     }
 
-    function pause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function pause() public {
         _pause();
     }
 
-    function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unpause() public {
         _unpause();
     }
 
