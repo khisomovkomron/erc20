@@ -29,10 +29,32 @@ contract TestMyToken is Test, Script {
         assertEq(token.totalSupply(), mintingValue * 2);
     }
 
+    function testMintingToNonExistingAddress() public {
+        vm.expectRevert();
+        token.mint(address(0), 100000 * 10 ** 18);
+    }
+
+    function testMintingZeroValue() public {
+        vm.expectRevert();
+        token.mint(msg.sender, 0);
+    }
+
     function testBurning() public {
         token.burn(msg.sender, (100000 * 10 ** 18) / 2);
         assertEq(token.totalSupply(), 50000 * 10 ** 18);
     }
+
+    function testBurningToNonExistingAddress() public {
+        vm.expectRevert();
+        token.burn(address(0), 100000 * 10 ** 18);
+    }
+
+
+    function testBurningZeroValue() public {
+        vm.expectRevert();
+        token.burn(msg.sender, 0);
+    }
+
 
     function testPauseContract() public {
         token.pause();

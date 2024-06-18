@@ -24,11 +24,15 @@ contract MyToken is ERC20, AccessControl, Pausable {
     }
 
     function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
+        require(to != address(0), "Address does not exist");
+        require(value > 0, "Minting value cannot be 0");
         _mint(to, value);
         emit MintingEvent(to, value);
     }
 
     function burn(address from, uint256 value) public onlyRole(BURNER_ROLE) {
+        require(from != address(0), "Address does not exist");
+        require(value > 0, "Burning value cannot be 0");
         _burn(from, value);
         emit BurningEvent(from, value);
     }
