@@ -6,15 +6,25 @@ import {AccessControl} from "lib/openzeppelin-contracts/contracts/access/AccessC
 import {Pausable} from "lib/openzeppelin-contracts/contracts/utils/Pausable.sol";
 import {console} from "lib/forge-std/src/console.sol";
 
+/**
+ * @title an ERC20 token that implements basic functions - minting, burning, pause, unpause
+ * @author Komron Khisomov
+ * @notice This contract is not audited, do not use it in mainnet
+ */
 contract MyToken is ERC20, AccessControl, Pausable {
+    // EVENTS
     event MintingEvent(address to, uint256 value);
     event BurningEvent(address from, uint256 value);
     event PausingEvent();
     event UnpausingEvent();
 
+    // STATE VARIABLES
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
+    /**
+    * @dev added required address for roles during the deployment
+     */
     constructor(address minter, address burner) ERC20("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, minter);
@@ -23,6 +33,12 @@ contract MyToken is ERC20, AccessControl, Pausable {
         console.log("Contract started");
     }
 
+    /**
+     * @dev requires role of minter given during deployment
+     * @notice this functions helps to mint new tokens
+     * @param to an address to which required to mint new tokens
+     * @param value amount required to mint
+     */
     function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
         require(to != address(0), "Address does not exist");
         require(value > 0, "Minting value cannot be 0");
@@ -30,6 +46,12 @@ contract MyToken is ERC20, AccessControl, Pausable {
         emit MintingEvent(to, value);
     }
 
+    /**
+     * @dev requires role of burner given during deployment
+     * @notice this functions helps to burn existing tokens from an address
+     * @param from an address from which will burn existing tokens
+     * @param value amount required to burn
+     */
     function burn(address from, uint256 value) public onlyRole(BURNER_ROLE) {
         require(from != address(0), "Address does not exist");
         require(value > 0, "Burning value cannot be 0");
@@ -37,11 +59,17 @@ contract MyToken is ERC20, AccessControl, Pausable {
         emit BurningEvent(from, value);
     }
 
+    /**
+     * @notice this functions helps to pause (lock) contract from minting and burning and other function 
+     */
     function pause() public {
         _pause();
         emit PausingEvent();
     }
 
+    /**
+     * @notice this function helps to unpause (unlock) a contract for minting and burning
+     */
     function unpause() public {
         _unpause();
         emit UnpausingEvent();
