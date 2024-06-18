@@ -7,6 +7,11 @@ import {Pausable} from "lib/openzeppelin-contracts/contracts/utils/Pausable.sol"
 import {console} from "lib/forge-std/src/console.sol";
 
 contract MyToken is ERC20, AccessControl, Pausable {
+    event MintingEvent(address to, uint256 value);
+    event BurningEvent(address from, uint256 value);
+    event PausingEvent();
+    event UnpausingEvent();
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
@@ -20,17 +25,21 @@ contract MyToken is ERC20, AccessControl, Pausable {
 
     function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
         _mint(to, value);
+        emit MintingEvent(to, value);
     }
 
     function burn(address from, uint256 value) public onlyRole(BURNER_ROLE) {
         _burn(from, value);
+        emit BurningEvent(from, value);
     }
 
     function pause() public {
         _pause();
+        emit PausingEvent();
     }
 
     function unpause() public {
         _unpause();
+        emit UnpausingEvent();
     }
 }
