@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {AccessControl} from "lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import {Pausable} from "lib/openzeppelin-contracts/contracts/utils/Pausable.sol";
 import {console} from "lib/forge-std/src/console.sol";
@@ -21,10 +22,12 @@ contract MyToken is ERC20, AccessControl, Pausable {
     // STATE VARIABLES
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-
+    mapping(address => uint256) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowance;
     /**
-    * @dev added required address for roles during the deployment
+     * @dev added required address for roles during the deployment
      */
+
     constructor(address minter, address burner) ERC20("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, minter);
@@ -43,6 +46,7 @@ contract MyToken is ERC20, AccessControl, Pausable {
         require(to != address(0), "Address does not exist");
         require(value > 0, "Minting value cannot be 0");
         _mint(to, value);
+        _balances[to] += value;
         emit MintingEvent(to, value);
     }
 
@@ -56,11 +60,33 @@ contract MyToken is ERC20, AccessControl, Pausable {
         require(from != address(0), "Address does not exist");
         require(value > 0, "Burning value cannot be 0");
         _burn(from, value);
+        _balances[to] -= value;
+
         emit BurningEvent(from, value);
     }
 
+    function balanceOf(address account) public returns (uint256) {
+        return balanceOf(account);
+    }
+
+    function approve(address spender, uint256 amount) public returns (bool) {
+        _allowance[msg.sender][spender] = amount;
+        return true;
+    }
+
+    function allowance(address owner, address spender) public returns (uint256) {
+        return _allowance[owner][spender];
+    }
+
+    function transferFrom(address spender, address recipient, uint256 amount) public returns (bool) {
+        approve(spender, recipient);
+        _transfer(spender, recipient, amount);
+
+        return true;
+    }
+
     /**
-     * @notice this functions helps to pause (lock) contract from minting and burning and other function 
+     * @notice this functions helps to pause (lock) contract from minting and burning and other function
      */
     function pause() public {
         _pause();
