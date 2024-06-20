@@ -9,14 +9,17 @@ import {DeployMyToken} from "../script/mytoken.s.sol";
 contract TestMyToken is Test, Script {
     MyToken token;
     uint256 mintingValue = 100000 * 10 ** 18;
+    uint256 allowanceAmount = 50000 * 10 ** 18;
     uint256 constant STARTING_BALANCE = 10 ether;
-    address USER = address(0x1234);
+    address USER = address(0x123);
+    address spender = address(0x456);
+    address recipient = address(0x789);
 
     function setUp() public {
         DeployMyToken deploy = new DeployMyToken();
         token = deploy.run();
+        token.approve(spender, allowanceAmount);
         vm.deal(USER, STARTING_BALANCE);
-
     }
 
     function testInitialSupply() public view {
@@ -49,17 +52,18 @@ contract TestMyToken is Test, Script {
         token.burn(address(0), 100000 * 10 ** 18);
     }
 
-
     function testBurningZeroValue() public {
         vm.expectRevert();
         token.burn(msg.sender, 0);
     }
 
+    function testAllowance() public {
+        assertEq(token.allowance(USER, spender), 50000 * 10 ** 18);
+    }
 
     function testPauseContract() public {
         token.pause();
         assertTrue(token.paused());
-
     }
 
     function testUnpauseContract() public {
@@ -68,7 +72,5 @@ contract TestMyToken is Test, Script {
         token.unpause();
 
         assertFalse(token.paused());
-
     }
-
 }

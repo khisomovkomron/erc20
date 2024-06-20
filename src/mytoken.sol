@@ -60,26 +60,26 @@ contract MyToken is ERC20, AccessControl, Pausable {
         require(from != address(0), "Address does not exist");
         require(value > 0, "Burning value cannot be 0");
         _burn(from, value);
-        _balances[to] -= value;
+        _balances[from] -= value;
 
         emit BurningEvent(from, value);
     }
 
-    function balanceOf(address account) public returns (uint256) {
+    function balanceOf(address account) public override view returns (uint256) {
         return balanceOf(account);
     }
 
-    function approve(address spender, uint256 amount) public returns (bool) {
+    function approve(address spender, uint256 amount) public override returns (bool) {
         _allowance[msg.sender][spender] = amount;
         return true;
     }
 
-    function allowance(address owner, address spender) public returns (uint256) {
+    function allowance(address owner, address spender) public override view returns (uint256) {
         return _allowance[owner][spender];
     }
 
-    function transferFrom(address spender, address recipient, uint256 amount) public returns (bool) {
-        approve(spender, recipient);
+    function transferFrom(address spender, address recipient, uint256 amount) public override returns (bool) {
+        approve(spender, amount);
         _transfer(spender, recipient, amount);
 
         return true;
