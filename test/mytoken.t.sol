@@ -18,8 +18,8 @@ contract TestMyToken is Test, Script {
     function setUp() public {
         DeployMyToken deploy = new DeployMyToken();
         token = deploy.run();
-        token.approve(spender, allowanceAmount);
-        vm.deal(USER, STARTING_BALANCE);
+        token.approve(msg.sender, spender, allowanceAmount);
+        // vm.deal(USER, STARTING_BALANCE);
     }
 
     function testInitialSupply() public view {
@@ -58,7 +58,7 @@ contract TestMyToken is Test, Script {
     }
 
     function testAllowance() public {
-        assertEq(token.allowance(USER, spender), 50000 * 10 ** 18);
+        assertEq(token.allowance(msg.sender, spender), 50000 * 10 ** 18);
     }
 
     function testPauseContract() public {

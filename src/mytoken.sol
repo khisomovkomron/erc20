@@ -69,8 +69,8 @@ contract MyToken is ERC20, AccessControl, Pausable {
         return balanceOf(account);
     }
 
-    function approve(address spender, uint256 amount) public override returns (bool) {
-        _allowance[msg.sender][spender] = amount;
+    function approve(address owner, address spender, uint256 amount) public returns (bool) {
+        _allowance[owner][spender] = amount;
         return true;
     }
 
