@@ -79,7 +79,6 @@ contract MyToken is ERC20, AccessControl, Pausable {
     }
 
     function transferFrom(address spender, address recipient, uint256 amount) public override returns (bool) {
-        approve(spender, amount);
         _transfer(spender, recipient, amount);
 
         return true;

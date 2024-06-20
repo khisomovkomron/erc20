@@ -61,6 +61,12 @@ contract TestMyToken is Test, Script {
         assertEq(token.allowance(msg.sender, spender), 50000 * 10 ** 18);
     }
 
+    function testTransferFrom() public {
+        token.allowance(msg.sender, spender);
+        token.transferFrom(spender, recipient, 40000 * 10 ** 18);
+        assertEq(token.balanceOf(recipient), 40000 * 10 ** 18);
+    }
+
     function testPauseContract() public {
         token.pause();
         assertTrue(token.paused());
