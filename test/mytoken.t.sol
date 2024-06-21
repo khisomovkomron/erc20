@@ -62,6 +62,9 @@ contract TestMyToken is Test, Script {
     }
 
     function testTransferFrom() public {
+        token.mint(spender, 100000 * 10 ** 18);
+        assertEq(token.balanceOf(spender), 100000 * 10 ** 18);
+
         token.allowance(msg.sender, spender);
         token.transferFrom(spender, recipient, 40000 * 10 ** 18);
         assertEq(token.balanceOf(recipient), 40000 * 10 ** 18);

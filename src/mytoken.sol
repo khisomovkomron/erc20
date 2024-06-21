@@ -60,7 +60,7 @@ contract MyToken is ERC20, AccessControl, Pausable {
         require(from != address(0), "Address does not exist");
         require(value > 0, "Burning value cannot be 0");
         _burn(from, value);
-        _balances[from] -= value;
+        // _balances[from] -= value;
 
         emit BurningEvent(from, value);
     }
