@@ -67,12 +67,12 @@ contract TestMyToken is Test, Script {
 
     function testTransferFrom() public {
         token.mint(msg.sender, 100000 * 10 ** 18);
+        console.log(token.balanceOf(msg.sender));
         token.approve(msg.sender, spender, allowanceAmount);
         assertEq(token.allowance(msg.sender, spender), 50000 * 10 ** 18);
-        console.log(address(msg.sender).balance);
         console.log(token.totalSupply());
         token.transferFrom(msg.sender, recipient, 40000 * 10 ** 18);
-        assertEq(address(recipient).balance, 40000 * 10 ** 18);
+        assertEq(token.balanceOf(recipient), 40000 * 10 ** 18);
     }
 
     function testPauseContract() public {
