@@ -71,14 +71,14 @@ contract TestMyToken is Test, Script {
         token.approve(msg.sender, spender, allowanceAmount);
         assertEq(token.allowance(msg.sender, spender), 50000 * 10 ** 18);
         console.log(token.totalSupply());
-        token.transferFrom(msg.sender, recipient, 40000 * 10 ** 18);
+        token.transferFrom(msg.sender, spender, recipient, 40000 * 10 ** 18);
         assertEq(token.balanceOf(recipient), 40000 * 10 ** 18);
     }
 
     function testTransferFromWithoutApprove() public {
         token.mint(msg.sender, 100000 * 10 ** 18);
         vm.expectRevert();
-        token.transferFrom(msg.sender, recipient, 40000 * 10 ** 18);
+        token.transferFrom(spender, msg.sender, recipient, 40000 * 10 ** 18);
     }
 
     function testPauseContract() public {

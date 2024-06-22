@@ -128,8 +128,8 @@ contract MyToken is AccessControl, Pausable {
     }
 
 
-    function transferFrom(address spender, address recipient, uint256 amount) public returns (bool) {
-        if(spendAllowance(spender, recipient) == false) {
+    function transferFrom(address owner, address spender, address recipient, uint256 amount) public returns (bool) {
+        if(spendAllowance(owner, spender) == false) {
             revert NotApprovedAllowance();
         } else{
             _updateToken(spender, recipient, amount);
