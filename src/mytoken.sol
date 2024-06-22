@@ -12,10 +12,11 @@ import {console} from "lib/forge-std/src/console.sol";
  * @author Komron Khisomov
  * @notice This contract is not audited, do not use it in mainnet
  */
-contract MyToken is ERC20, AccessControl, Pausable {
+contract MyToken is AccessControl, Pausable {
     error InsufficientBalance(address from, uint256 fromBalance, uint256 value);
     error AddressDoesNotExist();
     error MintingValueLessThanZero();
+    error BurningValueLessThanZero();
 
     // EVENTS
     event MintingEvent(address to, uint256 value);
@@ -27,19 +28,33 @@ contract MyToken is ERC20, AccessControl, Pausable {
     // STATE VARIABLES
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+
+    string private _name;
+    string private _symbol;
     uint256 private _totalSupply;
+
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowance;
-    /**
-     * @dev added required address for roles during the deployment
-     */
 
-    constructor(address minter, address burner) ERC20("MyToken", "MTK") {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, minter);
-        _grantRole(BURNER_ROLE, burner);
+    /**
+     * @dev add required address for roles during the deployment
+     */
+    constructor(string memory name_, string memory symbol_) {
+        // _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        // _grantRole(MINTER_ROLE, minter);
+        // _grantRole(BURNER_ROLE, burner);
+        _name = name_;
+        _symbol = symbol_;
         mint(msg.sender, 100000 * 10 ** 18);
         console.log("Contract started");
+    }
+
+    function name() public view returns (string memory){
+        return _name;
+    }
+
+    function symbol() public view returns (string memory){
+        return _symbol;
     }
 
     /**
@@ -48,12 +63,13 @@ contract MyToken is ERC20, AccessControl, Pausable {
      * @param to an address to which required to mint new tokens
      * @param value amount required to mint
      */
-    function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
-        if(to != address(0)) {
+    function mint(address to, uint256 value) public {
+    // function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
+        if(to == address(0)) {
             revert AddressDoesNotExist();
         }
 
-        if(value > 0) {
+        if(value == 0) {
             revert MintingValueLessThanZero();
         }
 
@@ -67,23 +83,24 @@ contract MyToken is ERC20, AccessControl, Pausable {
      * @param from an address from which will burn existing tokens
      * @param value amount required to burn
      */
-    function burn(address from, uint256 value) public onlyRole(BURNER_ROLE) {
-        if(from != address(0)) {
+    // function burn(address from, uint256 value) public onlyRole(BURNER_ROLE) {
+    function burn(address from, uint256 value) public {
+        if(from == address(0)) {
             revert AddressDoesNotExist();
         }
-        if(value > 0) {
-            revert MintingValueLessThanZero();
+        if(value == 0) {
+            revert BurningValueLessThanZero();
         }
 
         _updateToken(from, address(0), value);
         emit BurningEvent(from, value);
     }
 
-    function totalSupply() public override view returns (uint256) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public override view returns (uint256) {
+    function balanceOf(address account) public view returns (uint256) {
         return _balances[account];
     }
 
@@ -92,11 +109,11 @@ contract MyToken is ERC20, AccessControl, Pausable {
         return true;
     }
 
-    function allowance(address owner, address spender) public override view returns (uint256) {
+    function allowance(address owner, address spender) public view returns (uint256) {
         return _allowance[owner][spender];
     }
 
-    function transferFrom(address spender, address recipient, uint256 amount) public override returns (bool) {
+    function transferFrom(address spender, address recipient, uint256 amount) public returns (bool) {
         _updateToken(spender, recipient, amount);
 
         return true;

@@ -8,9 +8,7 @@ contract DeployMyToken is Script {
     function run() external returns (MyToken) {
         vm.startBroadcast();
 
-        MyToken mytoken = new MyToken(msg.sender, msg.sender);
-        mytoken.grantRole(mytoken.MINTER_ROLE(), msg.sender);
-        mytoken.grantRole(mytoken.BURNER_ROLE(), msg.sender);
+        MyToken mytoken = new MyToken("Test", "TST");
 
         vm.stopBroadcast();
 
