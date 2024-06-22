@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "lib/forge-std/src/Test.sol";
+import {console} from "lib/forge-std/src/console.sol";
 import {Script} from "lib/forge-std/src/Script.sol";
 import {MyToken} from "../src/mytoken.sol";
 import {DeployMyToken} from "../script/mytoken.s.sol";
@@ -18,8 +19,6 @@ contract TestMyToken is Test, Script {
     function setUp() public {
         DeployMyToken deploy = new DeployMyToken();
         token = deploy.run();
-        token.approve(msg.sender, spender, allowanceAmount);
-        // vm.deal(USER, STARTING_BALANCE);
     }
 
     function testInitialSupply() public view {
@@ -30,6 +29,8 @@ contract TestMyToken is Test, Script {
     function testMinting() public {
         token.mint(msg.sender, 100000 * 10 ** 18);
         assertEq(token.totalSupply(), mintingValue * 2);
+        token.mint(msg.sender, 100000 * 10 ** 18);
+        assertEq(token.totalSupply(), mintingValue * 3);
     }
 
     function testMintingToNonExistingAddress() public {
@@ -43,11 +44,13 @@ contract TestMyToken is Test, Script {
     }
 
     function testBurning() public {
-        token.burn(msg.sender, (100000 * 10 ** 18) / 2);
+        token.burn(msg.sender, 50000 * 10 ** 18);
         assertEq(token.totalSupply(), 50000 * 10 ** 18);
+        token.burn(msg.sender, 20000 * 10 ** 18);
+        assertEq(token.totalSupply(), 30000 * 10 ** 18);
     }
 
-    function testBurningToNonExistingAddress() public {
+    function testBurningFromNonExistingAddress() public {
         vm.expectRevert();
         token.burn(address(0), 100000 * 10 ** 18);
     }
@@ -58,16 +61,18 @@ contract TestMyToken is Test, Script {
     }
 
     function testAllowance() public {
+        token.approve(msg.sender, spender, allowanceAmount);
         assertEq(token.allowance(msg.sender, spender), 50000 * 10 ** 18);
     }
 
     function testTransferFrom() public {
-        token.mint(spender, 100000 * 10 ** 18);
-        assertEq(token.balanceOf(spender), 100000 * 10 ** 18);
-
-        token.allowance(msg.sender, spender);
-        token.transferFrom(spender, recipient, 40000 * 10 ** 18);
-        assertEq(token.balanceOf(recipient), 40000 * 10 ** 18);
+        token.mint(msg.sender, 100000 * 10 ** 18);
+        token.approve(msg.sender, spender, allowanceAmount);
+        assertEq(token.allowance(msg.sender, spender), 50000 * 10 ** 18);
+        console.log(address(msg.sender).balance);
+        console.log(token.totalSupply());
+        token.transferFrom(msg.sender, recipient, 40000 * 10 ** 18);
+        assertEq(address(recipient).balance, 40000 * 10 ** 18);
     }
 
     function testPauseContract() public {

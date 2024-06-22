@@ -13,15 +13,21 @@ import {console} from "lib/forge-std/src/console.sol";
  * @notice This contract is not audited, do not use it in mainnet
  */
 contract MyToken is ERC20, AccessControl, Pausable {
+    error InsufficientBalance(address from, uint256 fromBalance, uint256 value);
+    error AddressDoesNotExist();
+    error MintingValueLessThanZero();
+
     // EVENTS
     event MintingEvent(address to, uint256 value);
     event BurningEvent(address from, uint256 value);
     event PausingEvent();
     event UnpausingEvent();
+    event TransferToken(address from, address to, uint256 amount);
 
     // STATE VARIABLES
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowance;
     /**
@@ -32,7 +38,7 @@ contract MyToken is ERC20, AccessControl, Pausable {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, minter);
         _grantRole(BURNER_ROLE, burner);
-        _mint(msg.sender, 100000 * 10 ** 18);
+        mint(msg.sender, 100000 * 10 ** 18);
         console.log("Contract started");
     }
 
@@ -43,10 +49,15 @@ contract MyToken is ERC20, AccessControl, Pausable {
      * @param value amount required to mint
      */
     function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
-        require(to != address(0), "Address does not exist");
-        require(value > 0, "Minting value cannot be 0");
-        _mint(to, value);
-        _balances[to] += value;
+        if(to != address(0)) {
+            revert AddressDoesNotExist();
+        }
+
+        if(value > 0) {
+            revert MintingValueLessThanZero();
+        }
+
+        _updateToken(address(0), to, value);
         emit MintingEvent(to, value);
     }
 
@@ -57,16 +68,23 @@ contract MyToken is ERC20, AccessControl, Pausable {
      * @param value amount required to burn
      */
     function burn(address from, uint256 value) public onlyRole(BURNER_ROLE) {
-        require(from != address(0), "Address does not exist");
-        require(value > 0, "Burning value cannot be 0");
-        _burn(from, value);
-        // _balances[from] -= value;
+        if(from != address(0)) {
+            revert AddressDoesNotExist();
+        }
+        if(value > 0) {
+            revert MintingValueLessThanZero();
+        }
 
+        _updateToken(from, address(0), value);
         emit BurningEvent(from, value);
     }
 
+    function totalSupply() public override view returns (uint256) {
+        return _totalSupply;
+    }
+
     function balanceOf(address account) public override view returns (uint256) {
-        return balanceOf(account);
+        return _balances[account];
     }
 
     function approve(address owner, address spender, uint256 amount) public returns (bool) {
@@ -79,7 +97,7 @@ contract MyToken is ERC20, AccessControl, Pausable {
     }
 
     function transferFrom(address spender, address recipient, uint256 amount) public override returns (bool) {
-        _transfer(spender, recipient, amount);
+        _updateToken(spender, recipient, amount);
 
         return true;
     }
@@ -98,5 +116,26 @@ contract MyToken is ERC20, AccessControl, Pausable {
     function unpause() public {
         _unpause();
         emit UnpausingEvent();
+    }
+
+    function _updateToken(address from, address to, uint256 amount) private {
+        if(from == address(0)) {
+            _totalSupply += amount;
+        } else {
+            uint256 fromBalance = _balances[from];
+            if (fromBalance < amount) {
+                revert InsufficientBalance(from, fromBalance, amount);
+            }
+            _balances[from] = fromBalance - amount;
+        }
+
+        if(to == address(0)) {
+            _totalSupply -= amount;
+        } else {
+            _balances[to] += amount;
+        }
+
+        emit TransferToken(from, to, amount);
+
     }
 }
