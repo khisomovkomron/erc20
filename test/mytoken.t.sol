@@ -75,6 +75,12 @@ contract TestMyToken is Test, Script {
         assertEq(token.balanceOf(recipient), 40000 * 10 ** 18);
     }
 
+    function testTransferFromWithoutApprove() public {
+        token.mint(msg.sender, 100000 * 10 ** 18);
+        vm.expectRevert();
+        token.transferFrom(msg.sender, recipient, 40000 * 10 ** 18);
+    }
+
     function testPauseContract() public {
         token.pause();
         assertTrue(token.paused());

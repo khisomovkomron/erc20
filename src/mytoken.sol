@@ -17,6 +17,8 @@ contract MyToken is AccessControl, Pausable {
     error AddressDoesNotExist();
     error MintingValueLessThanZero();
     error BurningValueLessThanZero();
+    error NotApprovedAllowance();
+    error InsufficientFunds();
 
     // EVENTS
     event MintingEvent(address to, uint256 value);
@@ -64,7 +66,7 @@ contract MyToken is AccessControl, Pausable {
      * @param value amount required to mint
      */
     function mint(address to, uint256 value) public {
-    // function mint(address to, uint256 value) public onlyRole(MINTER_ROLE) {
+    // function mint(address to, uint256 value) public onlyRole(DEFAULT_ADMIN_ROLE) {
         if(to == address(0)) {
             revert AddressDoesNotExist();
         }
@@ -113,10 +115,25 @@ contract MyToken is AccessControl, Pausable {
         return _allowance[owner][spender];
     }
 
-    function transferFrom(address spender, address recipient, uint256 amount) public returns (bool) {
-        _updateToken(spender, recipient, amount);
+    /**
+    * @notice this function should check whethere allowance is approved or not, if not returning false, else true
+    * currently function approve always returns true, should be put condition 
+     */
+    function spendAllowance(address owner, address spender) private view returns (bool) {
+        if (allowance(owner, spender) > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-        return true;
+
+    function transferFrom(address spender, address recipient, uint256 amount) public returns (bool) {
+        if(spendAllowance(spender, recipient) == false) {
+            revert NotApprovedAllowance();
+        } else{
+            _updateToken(spender, recipient, amount);
+        }
     }
 
     /**
@@ -135,6 +152,10 @@ contract MyToken is AccessControl, Pausable {
         emit UnpausingEvent();
     }
 
+    /**
+     * @notice this function is used in minting/burning and transferFrom, according to from/to conditions the logic of the function changes. 
+     * If from is empty, then minting happens, if to is empty, then burning happens, else transfer is implemented
+     */
     function _updateToken(address from, address to, uint256 amount) private {
         if(from == address(0)) {
             _totalSupply += amount;
