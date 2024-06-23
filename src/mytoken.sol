@@ -13,7 +13,7 @@ import {console} from "lib/forge-std/src/console.sol";
  * @notice This contract is not audited, do not use it in mainnet
  */
 contract MyToken is AccessControl, Pausable {
-    error InsufficientBalance(address from, uint256 fromBalance, uint256 value);
+    error InsufficientBalance1(address from, uint256 fromBalance, uint256 value);
     error AddressDoesNotExist();
     error MintingValueLessThanZero();
     error BurningValueLessThanZero();
@@ -134,6 +134,8 @@ contract MyToken is AccessControl, Pausable {
         } else{
             _updateToken(spender, recipient, amount);
         }
+
+        return true;
     }
 
     /**
@@ -162,7 +164,7 @@ contract MyToken is AccessControl, Pausable {
         } else {
             uint256 fromBalance = _balances[from];
             if (fromBalance < amount) {
-                revert InsufficientBalance(from, fromBalance, amount);
+                revert InsufficientBalance1(from, fromBalance, amount);
             }
             _balances[from] = fromBalance - amount;
         }
