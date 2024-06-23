@@ -13,6 +13,7 @@ import {console} from "lib/forge-std/src/console.sol";
  * @notice This contract is not audited, do not use it in mainnet
  */
 contract MyToken is AccessControl, Pausable {
+    // ERRORS
     error InsufficientBalance1(address from, uint256 fromBalance, uint256 value);
     error AddressDoesNotExist();
     error MintingValueLessThanZero();
@@ -98,19 +99,36 @@ contract MyToken is AccessControl, Pausable {
         emit BurningEvent(from, value);
     }
 
+    /**
+    * @notice function that returns total amount of tokens for current moment
+     */
     function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
+    /**
+    * @notice function that returns amount of tokens kept in balance of an account
+    * @param account that holds tokens
+     */
     function balanceOf(address account) public view returns (uint256) {
         return _balances[account];
     }
 
+    /**
+    * @notice function that creates allowance of spender to be allowed amount of tokens from owners account in _allowance mapping
+    * @param owner an address required to check the allowance before transfer
+    * @param spender an address that can send allowed amount of tokens from owner account
+    * @param amount of tokens that will be transferred
+     */
     function approve(address owner, address spender, uint256 amount) public returns (bool) {
         _allowance[owner][spender] = amount;
         return true;
     }
-
+    /**
+    * @notice a function that returns allowance of spender from _allowance mapping
+    * @param owner an address required to check the allowance before transfer
+    * @param spender an address that can send allowed amount of tokens from owner account
+     */
     function allowance(address owner, address spender) public view returns (uint256) {
         return _allowance[owner][spender];
     }
@@ -127,7 +145,13 @@ contract MyToken is AccessControl, Pausable {
         }
     }
 
-
+    /**
+    * @notice function that transfers tokens from one account to another, this is not main function of transfer, function _update should overriden
+    * @param owner an address required to check the allowance before transfer
+    * @param spender an address that can send allowed amount of tokens from owner account
+    * @param recipient an address that will receive tokens from owners account send by spender 
+    * @param amount of tokens that will be transferred
+     */
     function transferFrom(address owner, address spender, address recipient, uint256 amount) public returns (bool) {
         if(spendAllowance(owner, spender) == false) {
             revert NotApprovedAllowance();
@@ -157,6 +181,9 @@ contract MyToken is AccessControl, Pausable {
     /**
      * @notice this function is used in minting/burning and transferFrom, according to from/to conditions the logic of the function changes. 
      * If from is empty, then minting happens, if to is empty, then burning happens, else transfer is implemented
+     * @param from an address from which tokens are sent
+     * @param to an address to which tokens are sent
+     * @param amount amount of tokens burnt/sent/transferred 
      */
     function _updateToken(address from, address to, uint256 amount) private {
         if(from == address(0)) {
@@ -178,4 +205,11 @@ contract MyToken is AccessControl, Pausable {
         emit TransferToken(from, to, amount);
 
     }
+
+    // TODO or can be DONE
+    // function that counts total amount of minted tokens
+    // function that counts total amount of burnt tokens
+    // function that can returns total number of token holders
+    // function that can returns list of all holder addresses
+    // function that can give other address the admin role
 }
